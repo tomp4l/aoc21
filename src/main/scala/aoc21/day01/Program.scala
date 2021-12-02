@@ -2,7 +2,7 @@ package aoc21
 package day01
 
 object Program:
-  def apply(): Day = new IntDay:
+  def apply() = new IntDay with PureDay[Int]:
     def part1(input: List[Int]): String =
       input
         .sliding(2)

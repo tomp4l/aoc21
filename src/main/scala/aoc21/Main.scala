@@ -8,8 +8,9 @@ import fs2.{Stream, text}
 
 object Main extends IOApp.Simple:
 
-  private val days: Map[Int, Day] = Map(
-    1 -> day01.Program()
+  private val days: Map[Int, Day[?]] = Map(
+    1 -> day01.Program(),
+    2 -> day02.Program()
   )
 
   def run: IO[Unit] =
@@ -23,10 +24,7 @@ object Main extends IOApp.Simple:
       )
       _ <- IO.println(s"Running day $day")
       input <- readInput(day)
-      part1 <- program.runPart1(input)
-      _ <- IO.println(s"Part 1 answer: $part1")
-      part2 <- program.runPart2(input)
-      _ <- IO.println(s"Part 2 answer: $part2")
+      part1 <- program.run(input)
     yield ()
 
   private def readInput(day: Int): IO[List[String]] =
