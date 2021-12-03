@@ -24,32 +24,31 @@ case class Position(horizontal: Int, depth: Int)
 
 case class AimedPosition(horizontal: Int, depth: Int, aim: Int)
 
-object Program:
-  def apply() = new PureDay:
-    type A = Direction
-    def parse(input: List[String]): IO[List[Direction]] =
-      input.map(Direction.parse).sequence
-    def part1(input: List[Direction]): String =
-      val finalPosition =
-        input.foldLeft(Position(0, 0))((position, direction) =>
-          direction match
-            case Forward(amount) =>
-              position.copy(horizontal = position.horizontal + amount)
-            case Down(amount) => position.copy(depth = position.depth + amount)
-            case Up(amount) => position.copy(depth = position.depth - amount)
-        )
-      (finalPosition.depth * finalPosition.horizontal).toString
-    def part2(input: List[Direction]): String =
-      val finalPosition =
-        input.foldLeft(AimedPosition(0, 0, 0))((position, direction) =>
-          direction match
-            case Forward(amount) =>
-              position.copy(
-                horizontal = position.horizontal + amount,
-                depth = position.depth + position.aim * amount
-              )
-            case Down(amount) => position.copy(aim = position.aim + amount)
-            case Up(amount) => position.copy(aim = position.aim - amount)
-        )
-      (finalPosition.depth * finalPosition.horizontal).toString
+object Program extends PureDay:
+  type A = Direction
+  def parse(input: List[String]): IO[List[Direction]] =
+    input.map(Direction.parse).sequence
+  def part1(input: List[Direction]): String =
+    val finalPosition =
+      input.foldLeft(Position(0, 0))((position, direction) =>
+        direction match
+          case Forward(amount) =>
+            position.copy(horizontal = position.horizontal + amount)
+          case Down(amount) => position.copy(depth = position.depth + amount)
+          case Up(amount) => position.copy(depth = position.depth - amount)
+      )
+    (finalPosition.depth * finalPosition.horizontal).toString
+  def part2(input: List[Direction]): String =
+    val finalPosition =
+      input.foldLeft(AimedPosition(0, 0, 0))((position, direction) =>
+        direction match
+          case Forward(amount) =>
+            position.copy(
+              horizontal = position.horizontal + amount,
+              depth = position.depth + position.aim * amount
+            )
+          case Down(amount) => position.copy(aim = position.aim + amount)
+          case Up(amount) => position.copy(aim = position.aim - amount)
+      )
+    (finalPosition.depth * finalPosition.horizontal).toString
 end Program
