@@ -2,7 +2,7 @@ package aoc21
 package day03
 
 object Program:
-  def apply(): Day[?] =
+  def apply(): Day =
     def countsFromStrings(input: List[String]) = input.foldLeft(
       input.headOption
         .map(l => List.fill(l.length)(Map.empty[Char, Int]))
@@ -26,7 +26,7 @@ object Program:
           loop(newRemaining)
       loop(input.map(c => (c, c)))
 
-    new StringDay with PureDay[String]:
+    new StringDay with PureDay:
       def part1(input: List[String]): String =
         val counts = countsFromStrings(input)
         val gamma = counts.map(_.maxBy(_._2)._1).mkString
