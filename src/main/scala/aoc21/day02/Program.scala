@@ -25,7 +25,7 @@ case class Position(horizontal: Int, depth: Int)
 case class AimedPosition(horizontal: Int, depth: Int, aim: Int)
 
 object Program extends PureDay:
-  type A = Direction
+  type A = List[Direction]
   def parse(input: List[String]): IO[List[Direction]] =
     input.map(Direction.parse).sequence
   def part1(input: List[Direction]): String =

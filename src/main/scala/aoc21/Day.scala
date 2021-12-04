@@ -5,22 +5,22 @@ import cats.syntax.all.*
 
 trait Day:
   type A
-  def parse(input: List[String]): IO[List[A]]
-  def runPart1(input: List[A]): IO[String]
-  def runPart2(input: List[A]): IO[String]
+  def parse(input: List[String]): IO[A]
+  def runPart1(input: A): IO[String]
+  def runPart2(input: A): IO[String]
 
 trait PureDay extends Day:
-  def part1(input: List[A]): String
-  def part2(input: List[A]): String
+  def part1(input: A): String
+  def part2(input: A): String
 
-  def runPart1(input: List[A]): IO[String] = IO.delay(part1(input))
-  def runPart2(input: List[A]): IO[String] = IO.delay(part2(input))
+  def runPart1(input: A): IO[String] = IO.delay(part1(input))
+  def runPart2(input: A): IO[String] = IO.delay(part2(input))
 
 trait StringDay extends Day:
-  type A = String
+  type A = List[String]
   def parse(input: List[String]) = IO.pure(input)
 
 trait IntDay extends Day:
-  type A = Int
+  type A = List[Int]
   def parse(l: List[String]): IO[List[Int]] =
     l.map(_.toIntIO).sequence

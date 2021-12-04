@@ -3,16 +3,17 @@ package day03
 
 object Program extends StringDay with PureDay:
 
-  private def countsFromStrings(input: List[String]) = input.foldLeft(
-    input.headOption
-      .map(l => List.fill(l.length)(Map.empty[Char, Int]))
-      .getOrElse(List.empty)
-  )((a, v) =>
-    a.zip(v)
-      .map { case (m, c) =>
-        m.updatedWith(c)(_.map(_ + 1).orElse(Some(1)))
-      }
-  )
+  private def countsFromStrings(input: List[String]) =
+    input.foldLeft(
+      input.headOption
+        .map(l => List.fill(l.length)(Map.empty[Char, Int]))
+        .getOrElse(List.empty)
+    )((a, v) =>
+      a.zip(v)
+        .map { case (m, c) =>
+          m.updatedWith(c)(_.map(_ + 1).orElse(Some(1)))
+        }
+    )
 
   private def rating(input: List[String], fitness: Map[Char, Int] => Char) =
     def loop(remaining: List[(String, String)]): String =

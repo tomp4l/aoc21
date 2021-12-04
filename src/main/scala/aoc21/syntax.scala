@@ -8,3 +8,8 @@ extension (s: String)
 
   def toBinaryInt: Int =
     Integer.parseInt(s, 2)
+
+extension [A](option: Option[A])
+  def toIO(t: => Throwable) = IO.fromOption(option)(t)
+  def toIOException(message: => String) =
+    option.toIO(new Exception(message))

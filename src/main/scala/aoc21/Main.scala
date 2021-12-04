@@ -12,7 +12,8 @@ object Main extends IOApp.Simple:
   private val days: Map[Int, Day] = Map(
     1 -> day01.Program,
     2 -> day02.Program,
-    3 -> day03.Program
+    3 -> day03.Program,
+    4 -> day04.Program
   )
 
   def run: IO[Unit] =
