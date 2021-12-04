@@ -3,6 +3,7 @@ package day04
 
 import cats.effect.IO
 import cats.syntax.all.*
+import cats.Show
 
 case class Board(values: Map[(Int, Int), Int])
 object Board:
@@ -50,9 +51,9 @@ case class BoardState(board: Map[(Int, Int), Int], matched: List[Int]):
   val width = board.keySet.maxBy(_._2)._2 + 1
   val height = board.keySet.maxBy(_._1)._1 + 1
 
-  def mark(i: Int) = board.values.exists(_ == i) match
-    case true => copy(matched = i :: matched)
-    case false => this
+  def mark(i: Int) = if board.values.exists(_ == i) then
+    copy(matched = i :: matched)
+  else this
 
   val matchedKeys = board.filter((_, i) => matched.contains(i)).keySet
 
@@ -63,6 +64,12 @@ case class BoardState(board: Map[(Int, Int), Int], matched: List[Int]):
   def score =
     val remaining = board -- matchedKeys
     remaining.map(_._2).sum * matched.head
+
+given Show[Board] = Show[Map[(Int, Int), Int]].contramap[Board](_.values)
+
+given Show[Bingo] = (b: Bingo) =>
+  (List("Bingo!", b.drawn.mkString(", ")) ++ b.boards.map(_.show))
+    .mkString("\n\n")
 
 object BoardState:
   def fromBoard(board: Board) = BoardState(board.values, List.empty)
@@ -83,6 +90,7 @@ object Program extends PureDay:
             case Some(v) => v.score.toString
             case _ => loop(rest, nextBoards)
     loop(input.drawn, input.boards.map(BoardState.fromBoard))
+
   def part2(input: this.A): String =
     def loop(
         marks: List[Int],

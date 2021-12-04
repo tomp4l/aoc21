@@ -10,9 +10,7 @@ object Program extends StringDay with PureDay:
         .getOrElse(List.empty)
     )((a, v) =>
       a.zip(v)
-        .map { case (m, c) =>
-          m.updatedWith(c)(_.map(_ + 1).orElse(Some(1)))
-        }
+        .map((m, c) => m.updatedWith(c)(_.map(_ + 1).orElse(Some(1))))
     )
 
   private def rating(input: List[String], fitness: Map[Char, Int] => Char) =
