@@ -2,22 +2,27 @@ package aoc21
 
 import cats.Show
 import cats.syntax.all.*
+import scala.annotation.tailrec
 
 given [A: Show]: Show[Map[(Int, Int), A]] with
   def show(m: Map[(Int, Int), A]): String =
+    @tailrec
     def loop(
         remaining: List[((Int, Int), A)],
         acc: List[List[A]]
     ): List[List[String]] =
       remaining match
         case Nil => acc.map(_.map(_.show))
-        case ((x, y), i) :: rest =>
+        case ((_, x), i) :: rest =>
           val (c, n) =
-            if (y == 0) then (List.empty, acc)
+            if (x == 0) then (List.empty, acc)
             else (acc.head, acc.tail)
           loop(rest, (c :+ i) :: n)
 
-    val groups = loop(m.toList.sortBy(_._1), List.empty)
+    val groups = loop(
+      m.toList.map { case ((x, y), a) => ((y, x), a) }.sortBy(_._1),
+      List.empty
+    )
 
     val columnWidths = groups
       .flatMap(_.zipWithIndex)

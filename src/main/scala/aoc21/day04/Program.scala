@@ -6,6 +6,7 @@ import cats.syntax.all.*
 import cats.Show
 
 case class Board(values: Map[(Int, Int), Int])
+
 object Board:
   def parse(input: List[String]): IO[(Board, List[String])] =
     def loop(
@@ -24,10 +25,12 @@ object Board:
               .toList
               .sequence
           val asMap =
-            split.map(_.zipWithIndex.map((v, i) => (row, i) -> v).toMap)
+            split.map(_.zipWithIndex.map((v, i) => (i, row) -> v).toMap)
           asMap.flatMap(m => loop(rest, current ++ m, row + 1))
     loop(input)
+
 case class Bingo(drawn: List[Int], boards: List[Board])
+
 object Bingo:
   def parse(input: List[String]): IO[Bingo] =
     val drawn =
@@ -35,9 +38,7 @@ object Bingo:
         .toIOException("missing input")
         .flatMap(_.split(",").map(_.toIntIO).toList.sequence)
     def loop(
-        remaining: List[String],
-        current: Map[(Int, Int), Int] = Map.empty,
-        row: Int = 0
+        remaining: List[String]
     ): IO[List[Board]] =
       remaining match
         case Nil => IO.pure(List.empty)
