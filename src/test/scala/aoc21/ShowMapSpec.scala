@@ -12,3 +12,8 @@ class ShowMapSpec extends munit.FunSuite:
     val map = Map((0, 0) -> 1, (1, 0) -> 23, (0, 1) -> 345, (1, 1) -> 4)
     assertEquals(map.show, "  1 23\n345  4")
   }
+
+  test("it fills in sparse maps") {
+    val map = Map((0, 0) -> 1, (2, 0) -> 2, (1, 2) -> 12)
+    assertEquals(map.show, "1  . 2\n.  . .\n. 12 .")
+  }
