@@ -1,17 +1,16 @@
 package aoc21
 package day03
 
+import cats.syntax.all.*
+
 object Program extends StringDay with PureDay:
 
   private def countsFromStrings(input: List[String]) =
-    input.foldLeft(
-      input.headOption
-        .map(l => List.fill(l.length)(Map.empty[Char, Int]))
-        .getOrElse(List.empty)
-    )((a, v) =>
-      a.zip(v)
-        .map((m, c) => m.updatedWith(c)(_.map(_ + 1).orElse(Some(1))))
-    )
+    input
+      // List of Maps with count of 1 for each Char (0/1)
+      .map(_.map(c => Map(c -> 1)).toList)
+      // Use Map + Int Semigroup to add up count of each char in each position
+      .fold(List.empty)(_.alignCombine(_))
 
   private def rating(input: List[String], fitness: Map[Char, Int] => Char) =
     def loop(remaining: List[(String, String)]): String =

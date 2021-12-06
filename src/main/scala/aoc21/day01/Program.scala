@@ -12,7 +12,7 @@ object Program extends IntDay with PureDay:
   def part2(input: List[Int]): String =
     input
       .sliding(3)
-      .collect { case List(a, b, c) => a + b + c }
+      .map(_.sum)
       .toList
       .sliding(2)
       .collect { case List(a, b) => a - b }

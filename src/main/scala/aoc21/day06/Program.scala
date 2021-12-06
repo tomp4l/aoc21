@@ -8,8 +8,9 @@ import scala.annotation.tailrec
 
 case class LanternFishes(state: Map[Int, Long]):
   def next = LanternFishes(
-    state.filterNot(_._1 == 0).map((k, v) => (k - 1) -> v) |+|
-      state.filter(_._1 == 0).flatMap((_, v) => Map(6 -> v, 8 -> v))
+    state.toList
+      .map((i, v) => if i == 0 then Map(6 -> v, 8 -> v) else Map(i - 1 -> v))
+      .combineAll
   )
 
   def size = state.values.sum
@@ -23,10 +24,7 @@ object Program extends PureDay:
           .split(",")
           .toList
           .traverse(_.toIntIO)
-          .map(_.foldLeft(Map.empty[Int, Long])(_.updatedWith(_) {
-            case Some(v) => Some(v + 1)
-            case None => Some(1)
-          }))
+          .map(_.groupMapReduce(identity)(_ => 1L)(_ + _))
           .map(LanternFishes(_))
       case _ => IO.raiseError(new Exception("Expecting single line input"))
 

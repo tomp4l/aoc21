@@ -45,31 +45,17 @@ object Program extends PureDay:
   def parse(input: List[String]): IO[this.A] =
     input.map(Line.parse).sequence
 
-  // Members declared in aoc21.PureDay
   def part1(input: this.A): String =
-    val allVents = input.onlyHorizontalOrVertical.map(_.points)
+    val allVents = input.onlyHorizontalOrVertical.flatMap(_.points.toList)
     val vents =
-      allVents.foldLeft(Map.empty[Point2d, Int])((map, points) =>
-        points.foldLeft(map)((m, p) =>
-          m.updatedWith(p) {
-            case Some(i) => Some(i + 1)
-            case None => Some(1)
-          }
-        )
-      )
+      allVents.groupMapReduce(identity)(_ => 1)(_ + _)
     val multiHit = vents.filter(_._2 > 1).size
     multiHit.toString
+
   def part2(input: this.A): String =
-    val allVents = input.map(_.points)
+    val allVents = input.flatMap(_.points.toList)
     val vents =
-      allVents.foldLeft(Map.empty[Point2d, Int])((map, points) =>
-        points.foldLeft(map)((m, p) =>
-          m.updatedWith(p) {
-            case Some(i) => Some(i + 1)
-            case None => Some(1)
-          }
-        )
-      )
+      allVents.groupMapReduce(identity)(_ => 1)(_ + _)
     val multiHit = vents.filter(_._2 > 1).size
     multiHit.toString
 end Program

@@ -47,10 +47,10 @@ given showIntTupleMap[A: Show]: Show[Map[(Int, Int), A]] with
 
       val columnWidths = groups
         .flatMap(_.zipWithIndex)
-        .groupBy(_._2)
+        .groupMapReduce(_._2)(_._1.length)(math.max)
         .toList
         .sortBy(_._1)
-        .map(_._2.map(_._1.length).max)
+        .map(_._2)
 
       val paddedGroups =
         groups.map(_.zip(columnWidths).map((s, i) => " " * (i - s.length) + s))
