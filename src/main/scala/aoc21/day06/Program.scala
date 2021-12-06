@@ -4,11 +4,7 @@ package day06
 import aoc21.PureDay
 import cats.effect.IO
 import cats.syntax.all.*
-
-case class LanternFish(state: Int):
-  def next =
-    if state == 0 then List(LanternFish(6), LanternFish(8))
-    else List(LanternFish(state - 1))
+import scala.annotation.tailrec
 
 case class LanternFishes(state: Map[Int, Long]):
   def next = LanternFishes(
@@ -34,15 +30,14 @@ object Program extends PureDay:
           .map(LanternFishes(_))
       case _ => IO.raiseError(new Exception("Expecting single line input"))
 
+  @tailrec
+  def parts(remaining: Int, fish: LanternFishes): LanternFishes =
+    if remaining == 0 then fish
+    else parts(remaining - 1, fish.next)
+
   def part1(input: this.A): String =
-    def loop(remaining: Int, fish: LanternFishes): LanternFishes =
-      if remaining == 0 then fish
-      else loop(remaining - 1, fish.next)
-    loop(80, input).size.toString
+    parts(80, input).size.toString
 
   def part2(input: this.A): String =
-    def loop(remaining: Int, fish: LanternFishes): LanternFishes =
-      if remaining == 0 then fish
-      else loop(remaining - 1, fish.next)
-    loop(256, input).size.toString
+    parts(256, input).size.toString
 end Program
