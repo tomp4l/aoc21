@@ -14,7 +14,8 @@ object Main extends IOApp.Simple:
     2 -> day02.Program,
     3 -> day03.Program,
     4 -> day04.Program,
-    5 -> day05.Program
+    5 -> day05.Program,
+    6 -> day06.Program
   )
 
   def run: IO[Unit] =
@@ -23,7 +24,7 @@ object Main extends IOApp.Simple:
       day <- IO.readLine
       _ <- day match
         case "all" =>
-          days.keySet.map(runDay).toList.sequence
+          days.keySet.toList.sorted.map(runDay).sequence
         case i => i.toIntIO.flatMap(runDay)
     yield ()
 
