@@ -15,7 +15,8 @@ object Main extends IOApp.Simple:
     3 -> day03.Program,
     4 -> day04.Program,
     5 -> day05.Program,
-    6 -> day06.Program
+    6 -> day06.Program,
+    7 -> day07.Program
   )
 
   def run: IO[Unit] =
