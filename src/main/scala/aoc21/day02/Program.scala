@@ -3,6 +3,7 @@ package day02
 
 import cats.effect.IO
 import cats.syntax.all.*
+import cats.data.State
 
 sealed trait Direction
 
@@ -27,20 +28,22 @@ case class AimedPosition(horizontal: Int, depth: Int, aim: Int)
 object Program extends PureDay:
   type A = List[Direction]
   def parse(input: List[String]): IO[List[Direction]] =
-    input.map(Direction.parse).sequence
+    input.traverse(Direction.parse)
   def part1(input: List[Direction]): String =
-    val finalPosition =
-      input.foldLeft(Position(0, 0))((position, direction) =>
+    val updatePosition = (direction: Direction) =>
+      State.modify[Position](position =>
         direction match
           case Forward(amount) =>
             position.copy(horizontal = position.horizontal + amount)
           case Down(amount) => position.copy(depth = position.depth + amount)
           case Up(amount) => position.copy(depth = position.depth - amount)
       )
+    val finalPosition =
+      input.traverse(updatePosition).runS(Position(0, 0)).value
     (finalPosition.depth * finalPosition.horizontal).toString
   def part2(input: List[Direction]): String =
-    val finalPosition =
-      input.foldLeft(AimedPosition(0, 0, 0))((position, direction) =>
+    val updatePosition = (direction: Direction) =>
+      State.modify[AimedPosition](position =>
         direction match
           case Forward(amount) =>
             position.copy(
@@ -50,5 +53,7 @@ object Program extends PureDay:
           case Down(amount) => position.copy(aim = position.aim + amount)
           case Up(amount) => position.copy(aim = position.aim - amount)
       )
+    val finalPosition =
+      input.traverse(updatePosition).runS(AimedPosition(0, 0, 0)).value
     (finalPosition.depth * finalPosition.horizontal).toString
 end Program
