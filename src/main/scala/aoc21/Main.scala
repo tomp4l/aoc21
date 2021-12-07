@@ -6,8 +6,9 @@ import cats.syntax.all.*
 import fs2.io.file.Files
 import fs2.io.file.Path
 import fs2.{Stream, text}
+import cats.effect.ExitCode
 
-object Main extends IOApp.Simple:
+object Main extends IOApp:
 
   private val days: Map[Int, Day] = Map(
     1 -> day01.Program,
@@ -19,15 +20,17 @@ object Main extends IOApp.Simple:
     7 -> day07.Program
   )
 
-  def run: IO[Unit] =
+  def run(args: List[String]): IO[ExitCode] =
     for
-      _ <- IO.println("Which day?")
-      day <- IO.readLine
+      day <- args match
+        case List(i) => IO(i)
+        case _ =>
+          IO.println("Which day?") >> IO.readLine
       _ <- day match
         case "all" =>
           days.keySet.toList.sorted.map(runDay).sequence
         case i => i.toIntIO.flatMap(runDay)
-    yield ()
+    yield ExitCode.Success
 
   private def runDay(day: Int) = for
     program <- IO.fromOption(days.get(day))(

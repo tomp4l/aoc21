@@ -6,7 +6,7 @@ import cats.effect.IO
 import cats.syntax.all.*
 import scala.annotation.tailrec
 
-case class LanternFishes(state: Map[Int, Long]):
+class LanternFishes(state: Map[Int, Long]):
   def next = LanternFishes(
     state.toList
       .map((i, v) => if i == 0 then Map(6 -> v, 8 -> v) else Map(i - 1 -> v))

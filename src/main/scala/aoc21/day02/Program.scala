@@ -13,10 +13,10 @@ case class Up(amount: Int) extends Direction
 object Direction:
 
   def parse(s: String): IO[Direction] =
-    s.split(" ").toList match
-      case List("forward", i) => i.toIntIO.map(Forward(_))
-      case List("down", i) => i.toIntIO.map(Down(_))
-      case List("up", i) => i.toIntIO.map(Up(_))
+    s match
+      case s"forward $i" => i.toIntIO.map(Forward(_))
+      case s"down $i" => i.toIntIO.map(Down(_))
+      case s"up $i" => i.toIntIO.map(Up(_))
       case _ =>
         IO.raiseError(new Exception(s"Unable to parse direction from $s"))
 
