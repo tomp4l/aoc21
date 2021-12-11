@@ -13,6 +13,13 @@ final case class Point2d(x: Int, y: Int):
     Point2d(x, y - 1)
   )
 
+  def diagonals = List(
+    Point2d(x + 1, y + 1),
+    Point2d(x - 1, y + 1),
+    Point2d(x + 1, y - 1),
+    Point2d(x - 1, y - 1)
+  )
+
 given Order[Point2d] = Order.by(p => (p.x, p.y))
 given Ordering[Point2d] = Ordering.by(p => (p.x, p.y))
 
