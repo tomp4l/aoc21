@@ -6,19 +6,7 @@ import aoc21.PureDay
 import aoc21.Point2d
 import cats.syntax.all.*
 
-object Program extends PureDay:
-
-  type A = Map[Point2d, Int]
-
-  def parse(input: List[String]) =
-    input
-      .map(_.zipWithIndex)
-      .zipWithIndex
-      .flatMap((c, y) =>
-        c.map((i, x) => i.toString.toIntIO.map(Point2d(x, y) -> _))
-      )
-      .sequence
-      .map(_.toMap)
+object Program extends PureDay with Int2dDay:
 
   def neighbours(point: Point2d, map: A) =
     point.neighbours.flatMap(map.get(_))

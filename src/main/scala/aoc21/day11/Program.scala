@@ -5,18 +5,7 @@ import cats.syntax.all.*
 import cats.data.State
 import cats.Monad
 
-object Program extends PureDay:
-  type A = Map[Point2d, Int]
-
-  def parse(input: List[String]): cats.effect.IO[A] =
-    input
-      .map(_.zipWithIndex)
-      .zipWithIndex
-      .flatMap((c, y) =>
-        c.map((i, x) => i.toString.toIntIO.map(Point2d(x, y) -> _))
-      )
-      .sequence
-      .map(_.toMap)
+object Program extends PureDay with Int2dDay:
 
   def simulateFlashes(map: A): (A, Int) =
     Monad[[X] =>> State[A, X]]

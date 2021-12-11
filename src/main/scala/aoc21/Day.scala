@@ -24,3 +24,20 @@ trait IntDay extends Day:
   type A = List[Int]
   def parse(l: List[String]): IO[List[Int]] =
     l.map(_.toIntIO).sequence
+
+trait Some2dDay extends Day:
+  type I
+  type A = Map[Point2d, I]
+  def splitLine(l: String) = l.split("")
+  def parseItem(i: String): IO[I]
+  def parse(input: List[String]): cats.effect.IO[A] =
+    input
+      .map(l => splitLine(l).zipWithIndex)
+      .zipWithIndex
+      .flatMap((c, y) => c.map((i, x) => parseItem(i).map(Point2d(x, y) -> _)))
+      .sequence
+      .map(_.toMap)
+
+trait Int2dDay extends Some2dDay:
+  type I = Int
+  def parseItem(i: String): IO[I] = i.toIntIO
