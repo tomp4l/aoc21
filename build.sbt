@@ -10,6 +10,10 @@ lazy val root = (project in file(".")).settings(
     "co.fs2" %% "fs2-core" % "3.2.0",
     "co.fs2" %% "fs2-io" % "3.2.0",
     "org.typelevel" %% "munit-cats-effect-3" % "1.0.6" % Test
+  ),
+  scalacOptions ++= Seq(
+    "-source",
+    "future"
   )
 )
 
