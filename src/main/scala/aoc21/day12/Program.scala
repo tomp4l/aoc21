@@ -43,20 +43,18 @@ object Program extends PureDay:
       current: Cave,
       graph: A,
       path: List[Cave],
-      filter: (List[Cave]) => Set[Cave]
-  ): Eval[List[List[Cave]]] =
-    val neighbours = graph(current) -- filter(path)
-    neighbours.toList
-      .traverse[Eval, List[List[Cave]]](c =>
+      filter: (List[Cave]) => Cave => Boolean
+  ): Eval[Int] =
+    val filtered = filter(path)
+    graph(current).toList
+      .traverse[Eval, Int](c =>
         c match
-          case Cave.Start => Eval.now(List.empty)
-          case Cave.End => Eval.now(List(Cave.End :: path))
-          case c: Cave.Big =>
-            Eval.defer(traverseCaves(c, graph, c :: path, filter))
-          case c: Cave.Small =>
-            Eval.defer(traverseCaves(c, graph, c :: path, filter))
+          case Cave.Start => Eval.now(0)
+          case Cave.End => Eval.now(1)
+          case c if (filtered(c)) => Eval.now(0)
+          case c => Eval.defer(traverseCaves(c, graph, c :: path, filter))
       )
-      .map(_.flatten)
+      .map(_.sum)
 
   def part1(input: A): String =
     traverseCaves(
@@ -64,7 +62,7 @@ object Program extends PureDay:
       input,
       List(Cave.Start),
       _.filter(_.isSmall).toSet
-    ).value.length.toString
+    ).value.toString
 
   def part2(input: A): String =
     traverseCaves(
@@ -76,5 +74,5 @@ object Program extends PureDay:
         val max = small.groupBy(identity).map(_._2.size).maxOption.getOrElse(0)
         if max > 1 then small.toSet
         else Set.empty
-    ).value.length.toString
+    ).value.toString
 end Program
