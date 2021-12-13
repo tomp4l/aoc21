@@ -11,15 +11,16 @@ given showIntTupleMap[A: Show]: Show[Map[(Int, Int), A]] with
       @tailrec
       def loop(
           remaining: List[((Int, Int), String)],
-          acc: List[List[String]]
+          acc: List[List[String]],
+          minX: Int
       ): List[List[String]] =
         remaining match
           case Nil => acc.map(_.map(_.show))
           case ((_, x), i) :: rest =>
             val (c, n) =
-              if (x == 0) then (List.empty, acc)
+              if (x == minX) then (List.empty, acc)
               else (acc.head, acc.tail)
-            loop(rest, (c :+ i) :: n)
+            loop(rest, (c :+ i) :: n, minX)
 
       val maxX = m.maxBy(_._1._1)._1._1
       val maxY = m.maxBy(_._1._2)._1._2
@@ -42,7 +43,8 @@ given showIntTupleMap[A: Show]: Show[Map[(Int, Int), A]] with
         filledMap.toList
           .map { case ((x, y), a) => ((y, x), a.show) }
           .sortBy(_._1),
-        List.empty
+        List.empty,
+        minX
       ).reverse
 
       val columnWidths = groups
@@ -56,7 +58,7 @@ given showIntTupleMap[A: Show]: Show[Map[(Int, Int), A]] with
         groups.map(_.zip(columnWidths).map((s, i) => " " * (i - s.length) + s))
 
       paddedGroups
-        .map(_.mkString(" "))
+        .map(_.mkString)
         .mkString("\n")
   end show
 end showIntTupleMap
