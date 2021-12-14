@@ -43,7 +43,7 @@ object Program extends PureDay:
           recipes.getOrElse(s, Map(s -> 1L)).map((s, j) => s -> i * j)
         )
         .toList
-        .reduce(_ |+| _)
+        .combineAll
     )
 
   def run(input: A, n: Int) =
