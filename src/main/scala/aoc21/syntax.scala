@@ -9,6 +9,9 @@ extension (s: String)
   def toBinaryInt: Int =
     Integer.parseInt(s, 2)
 
+  def toBinaryLong: Long =
+    BigInt(s, 2).longValue
+
 extension [A](option: Option[A])
   def toIO(t: => Throwable) = IO.fromOption(option)(t)
   def toIOException(message: => String) =
