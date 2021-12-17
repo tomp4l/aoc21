@@ -7,6 +7,9 @@ import fs2.io.file.Files
 import fs2.io.file.Path
 import fs2.{Stream, text}
 import cats.effect.ExitCode
+import cats.effect.kernel.Clock
+import java.util.concurrent.TimeUnit
+import scala.concurrent.duration.FiniteDuration
 
 object Main extends IOApp:
 
@@ -42,6 +45,12 @@ object Main extends IOApp:
         case i => i.toIntIO.flatMap(runDay)
     yield ExitCode.Success
 
+  extension (d: FiniteDuration)
+    def formatMillis(dp: Int) =
+      BigDecimal(d.toUnit(TimeUnit.MILLISECONDS))
+        .setScale(dp, BigDecimal.RoundingMode.HALF_UP)
+        .toString
+
   private def runDay(day: Int) = for
     program <- IO.fromOption(days.get(day))(
       new Exception(s"Day $day is not defined yet")
@@ -49,10 +58,14 @@ object Main extends IOApp:
     _ <- IO.println(s"Running day $day")
     input <- readInput(day)
     parsed <- program.parse(input)
-    part1 <- program.runPart1(parsed)
-    _ <- IO.println(s"Part 1 answer: $part1")
-    part2 <- program.runPart2(parsed)
-    _ <- IO.println(s"Part 2 answer: $part2")
+    part1 <- Clock[IO].timed(program.runPart1(parsed))
+    _ <- IO.println(
+      s"Part 1 answer: ${part1._2} in ${part1._1.formatMillis(2)} ms"
+    )
+    part2 <- Clock[IO].timed(program.runPart2(parsed))
+    _ <- IO.println(
+      s"Part 2 answer: ${part2._2} in ${part2._1.formatMillis(2)} ms"
+    )
   yield ()
 
   private def readInput(day: Int): IO[List[String]] =
