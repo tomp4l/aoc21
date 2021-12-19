@@ -16,3 +16,13 @@ extension [A](option: Option[A])
   def toIO(t: => Throwable) = IO.fromOption(option)(t)
   def toIOException(message: => String) =
     option.toIO(new Exception(message))
+
+extension [A](list: List[A])
+  def split(a: A): List[List[A]] =
+    def loop(remainder: List[A], acc: List[List[A]]): List[List[A]] =
+      val (l, r) = remainder.span(_ != a)
+      r match
+        case _ :: rest =>
+          loop(rest, l :: acc)
+        case Nil => (l :: acc).reverse
+    loop(list, List.empty)

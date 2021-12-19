@@ -31,7 +31,8 @@ object Main extends IOApp:
     15 -> day15.Program,
     16 -> day16.Program,
     17 -> day17.Program,
-    18 -> day18.Program
+    18 -> day18.Program,
+    19 -> day19.Program
   )
 
   def run(args: List[String]): IO[ExitCode] =
@@ -58,12 +59,13 @@ object Main extends IOApp:
     )
     _ <- IO.println(s"Running day $day")
     input <- readInput(day)
-    parsed <- program.parse(input)
-    part1 <- Clock[IO].timed(program.runPart1(parsed))
+    parsed <- Clock[IO].timed(program.parse(input))
+    _ <- IO.println(s"Parsed in ${parsed._1.formatMillis(2)} ms")
+    part1 <- Clock[IO].timed(program.runPart1(parsed._2))
     _ <- IO.println(
       s"Part 1 answer: ${part1._2} in ${part1._1.formatMillis(2)} ms"
     )
-    part2 <- Clock[IO].timed(program.runPart2(parsed))
+    part2 <- Clock[IO].timed(program.runPart2(parsed._2))
     _ <- IO.println(
       s"Part 2 answer: ${part2._2} in ${part2._1.formatMillis(2)} ms"
     )
