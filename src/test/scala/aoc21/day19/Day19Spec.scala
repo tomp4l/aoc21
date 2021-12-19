@@ -9,6 +9,9 @@ class Day19Spec extends munit.FunSuite:
     def diff(a: Point2d, b: Point2d) = Point2d(a.x - b.x, a.y - b.y)
     def zero = Point2d(0, 0)
 
+    def manhatten(a: Point2d, b: Point2d) =
+      math.abs(a.x - b.x) + math.abs(a.y - b.y)
+
   given Rotatable[Point2d] with
     enum Rotation2d:
       case Zero

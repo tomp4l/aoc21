@@ -8,6 +8,7 @@ import cats.Id
 trait Addable[A]:
   def plus(a: A, b: A): A
   def diff(a: A, b: A): A
+  def manhatten(a: A, b: A): Int
   def zero: A
 
 object Addable:
@@ -68,10 +69,18 @@ given Addable[Point3d] with
   def zero = Point3d(0, 0, 0)
   def plus(a: Point3d, b: Point3d) = Point3d(a.x + b.x, a.y + b.y, a.z + b.z)
   def diff(a: Point3d, b: Point3d) = Point3d(a.x - b.x, a.y - b.y, a.z - b.z)
+  def manhatten(a: Point3d, b: Point3d) =
+    math.abs(a.x - b.x) + math.abs(a.y - b.y) + math.abs(a.z - b.z)
+
 case class Scanner[A](id: Int, points: Set[A]):
   def relativePoints(using Addable[A]): Map[A, Set[A]] =
     points
       .map(p => p -> (points.map(p2 => p2 - p).toSet - Addable[A].zero))
+      .toMap
+
+  def manhattenPoints(using Addable[A]): Map[A, Set[Int]] =
+    points
+      .map(p => p -> (points.map(p2 => Addable[A].manhatten(p, p2)).toSet - 0))
       .toMap
 
   def orientations(using rotater: Rotatable[A]): Set[Scanner[A]] =
@@ -95,9 +104,16 @@ object Scanner:
       b: Scanner[A],
       alignment: Int
   ): Option[(A, Scanner[A])] =
-    b.orientations.foldLeft(Option.empty)((e, s) =>
-      e.orElse(tryAlignScannerOrientation(a, s, alignment))
-    )
+    val target = a.points.size - alignment + 1
+    val mpa = a.manhattenPoints
+    val mpb = b.manhattenPoints
+    val intersections =
+      mpa.count((k, v) => mpb.exists((_, v2) => v.diff(v2).size <= target))
+    if intersections < alignment then None
+    else
+      b.orientations.foldLeft(Option.empty)((e, s) =>
+        e.orElse(tryAlignScannerOrientation(a, s, alignment))
+      )
 
   private def tryAlignScannerOrientation[A: Addable](
       a: Scanner[A],
@@ -107,16 +123,16 @@ object Scanner:
     val rpa = a.relativePoints
     val rpb = b.relativePoints
 
-    val intersection = rpa.values.flatMap(v =>
-      rpb.values
-        .find(v2 => v.intersect(v2).size == (alignment - 1))
-        .map(v2 => v.intersect(v2))
+    val intersection = rpa.flatMap((k, v) =>
+      rpb
+        .find((_, v2) => v.intersect(v2).size == (alignment - 1))
+        .map((k2, v2) => (k, k2) -> v.intersect(v2))
     )
     if intersection.size == alignment then
-      val examplePoint = intersection.head
+      val examplePoint = intersection.headOption
       (
-        rpa.find(s => examplePoint.subsetOf(s._2)).map(_._1),
-        rpb.find(s => examplePoint.subsetOf(s._2)).map(_._1)
+        examplePoint.map(_._1._1),
+        examplePoint.map(_._1._2)
       ).mapN((a, b) => a - b)
         .map(diff => diff -> b.copy(points = b.points.map(p => diff + p)))
     else None
@@ -139,7 +155,6 @@ object Program extends PureDay:
 
     def align(
         current: Scanner3d,
-        relativePosition: Point3d,
         remaining: List[Scanner3d],
         previouslyAligned: List[Scanner3d],
         positions: List[Point3d]
@@ -151,12 +166,11 @@ object Program extends PureDay:
         (a, s) =>
           val alignedIds = a._1.map(_.id).toSet
           val unalignedRemaining = remaining.filterNot(s => alignedIds(s.id))
-          align(s._2, s._1, unalignedRemaining, a._1, s._1 :: a._2)
+          align(s._2, unalignedRemaining, a._1, s._1 :: a._2)
       )
 
     val (p, m) = align(
       initial,
-      Point3d(0, 0, 0),
       rest,
       List(initial),
       List(Point3d(0, 0, 0))
@@ -169,8 +183,7 @@ object Program extends PureDay:
   def part2(input: A): String =
     val locs = input._2
     locs
-      .flatMap(a => locs.map(b => Addable[Point3d].diff(a, b)))
-      .map(p => math.abs(p.x) + math.abs(p.y) + math.abs(p.z))
+      .flatMap(a => locs.map(b => Addable[Point3d].manhatten(a, b)))
       .max
       .toString
 
