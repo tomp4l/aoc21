@@ -68,21 +68,14 @@ object Program extends PureDay:
         }
       )
 
+  val offsets = (-1 to 1).flatMap(y => (-1 to 1).map(x => Point2d(x, y))).toList
+
   def step(algorithm: Vector[Pixel]) =
     State.modify[(Map[Point2d, Pixel], Pixel)]((image, infinityState) =>
       val padded = padImage(image, infinityState)
       padded.map((p, v) =>
-        val pixelValue = List(
-          Point2d(-1, -1),
-          Point2d(0, -1),
-          Point2d(1, -1),
-          Point2d(-1, 0),
-          Point2d(0, 0),
-          Point2d(1, 0),
-          Point2d(-1, 1),
-          Point2d(0, 1),
-          Point2d(1, 1)
-        ).map(relative => padded.getOrElse(p + relative, infinityState))
+        val pixelValue =
+          offsets.map(relative => padded.getOrElse(p + relative, infinityState))
         p -> algorithm(pixelToInt(pixelValue))
       ) -> (infinityState match
         case Pixel.Dark => algorithm.head
