@@ -146,9 +146,11 @@ object Program extends PureDay:
     input
       .split("")
       .traverse(Scanner.parse[Point3d](_, Point3d.parse))
-      .map(alignScanners)
+      .flatMap(alignScanners)
 
-  def alignScanners(input: List[Scanner3d]): (Set[Scanner3d], Set[Point3d]) =
+  def alignScanners(
+      input: List[Scanner3d]
+  ): IO[(Set[Scanner3d], Set[Point3d])] =
     val initial = input.head
     val rest = input.tail
     val origin = Point3d(0, 0, 0)
@@ -158,24 +160,30 @@ object Program extends PureDay:
         remaining: List[Scanner3d],
         previouslyAligned: List[Scanner3d],
         positions: List[Point3d]
-    ): (List[Scanner3d], List[Point3d]) =
+    ): IO[(List[Scanner3d], List[Point3d])] =
       val aligned =
-        remaining.flatMap(s => Scanner.tryAlignScanner(current, s, 12))
+        remaining
+          .parTraverse(s => IO { Scanner.tryAlignScanner(current, s, 12) })
+          .map(_.flatten)
 
-      aligned.foldLeft((previouslyAligned ++ aligned.map(_._2)) -> positions)(
-        (a, s) =>
-          val alignedIds = a._1.map(_.id).toSet
-          val unalignedRemaining = remaining.filterNot(s => alignedIds(s.id))
-          align(s._2, unalignedRemaining, a._1, s._1 :: a._2)
+      aligned.flatMap(aligned =>
+        aligned.foldLeft(
+          IO(previouslyAligned ++ aligned.map(_._2) -> positions)
+        )((aio, s) =>
+          aio.flatMap(a =>
+            val alignedIds = a._1.map(_.id).toSet
+            val unalignedRemaining = remaining.filterNot(s => alignedIds(s.id))
+            align(s._2, unalignedRemaining, a._1, s._1 :: a._2)
+          )
+        )
       )
 
-    val (p, m) = align(
+    align(
       initial,
       rest,
       List(initial),
       List(Point3d(0, 0, 0))
-    )
-    (p.toSet, m.toSet)
+    ).map((p, m) => (p.toSet, m.toSet))
   end alignScanners
 
   def part1(input: A): String =
