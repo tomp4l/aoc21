@@ -28,15 +28,10 @@ trait IntDay extends Day:
 trait Some2dDay extends Day:
   type I
   type A = Map[Point2d, I]
-  def splitLine(l: String) = l.split("")
+  def splitLine(l: String): List[String] = l.split("").toList
   def parseItem(i: String): IO[I]
   def parse(input: List[String]): cats.effect.IO[A] =
-    input
-      .map(l => splitLine(l).zipWithIndex)
-      .zipWithIndex
-      .flatMap((c, y) => c.map((i, x) => parseItem(i).map(Point2d(x, y) -> _)))
-      .sequence
-      .map(_.toMap)
+    input.to2dMap(splitLine, parseItem)
 
 trait Int2dDay extends Some2dDay:
   type I = Int

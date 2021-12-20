@@ -1,6 +1,7 @@
 package aoc21
 
 import cats.effect.IO
+import cats.syntax.all.*
 
 extension (s: String)
   def toIntIO: IO[Int] =
@@ -26,3 +27,15 @@ extension [A](list: List[A])
           loop(rest, l :: acc)
         case Nil => (l :: acc).reverse
     loop(list, List.empty)
+
+extension (list: List[String])
+  def to2dMap[A](
+      splitLine: String => List[String],
+      parseItem: String => IO[A]
+  ): IO[Map[Point2d, A]] =
+    list
+      .map(l => splitLine(l).zipWithIndex)
+      .zipWithIndex
+      .flatMap((c, y) => c.map((i, x) => parseItem(i).map(Point2d(x, y) -> _)))
+      .sequence
+      .map(_.toMap)
