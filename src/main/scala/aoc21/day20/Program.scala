@@ -51,6 +51,23 @@ object Program extends PureDay:
     val toAdd = extraPoints.map(p => p -> padWith).toMap
     image ++ toAdd
 
+  val pixelToInt =
+    var memo: Map[List[Pixel], Int] = Map.empty
+    (pixels: List[Pixel]) =>
+      memo.getOrElse(
+        pixels, {
+          val p = pixels
+            .map {
+              case Pixel.Dark => "0"
+              case Pixel.Light => "1"
+            }
+            .mkString
+            .toBinaryInt
+          memo = memo + (pixels -> p)
+          p
+        }
+      )
+
   def step(algorithm: Vector[Pixel]) =
     State.modify[(Map[Point2d, Pixel], Pixel)]((image, infinityState) =>
       val padded = padImage(image, infinityState)
@@ -66,13 +83,7 @@ object Program extends PureDay:
           Point2d(0, 1),
           Point2d(1, 1)
         ).map(relative => padded.getOrElse(p + relative, infinityState))
-          .map {
-            case Pixel.Dark => "0"
-            case Pixel.Light => "1"
-          }
-          .mkString
-          .toBinaryInt
-        p -> algorithm(pixelValue)
+        p -> algorithm(pixelToInt(pixelValue))
       ) -> (infinityState match
         case Pixel.Dark => algorithm.head
         case Pixel.Light => algorithm.last
