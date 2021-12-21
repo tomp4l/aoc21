@@ -94,7 +94,7 @@ object Program extends PureDay:
 
     (end.die.rolls * (math.min(end.p1.score, end.p2.score))).toString
 
-  def quantumTurn(die: DiracDie) =
+  def quantumTurn(die: DiracDie, targetScore: Int) =
     val combinations = die.possibilities3.map(_._2).sum
     State[QuantumGameState, Boolean](s =>
       val active = if s.p1Turn then s.p1State else s.p2State
@@ -106,7 +106,7 @@ object Program extends PureDay:
       val next = rolls
         .map((roll, rollCount) =>
           active
-            .filter(_._1.score < 21)
+            .filter(_._1.score < targetScore)
             .map((player, scoreCount) =>
               val nextState = player.takeQuantumTurn(roll)
 
@@ -114,7 +114,7 @@ object Program extends PureDay:
             )
         )
         .reduce(_ |+| _)
-      val wins = next.filter(_._1.score >= 21).map(_._2.toLong).sum
+      val wins = next.filter(_._1.score >= targetScore).map(_._2.toLong).sum
       val openGames = (games * combinations - wins)
       val nextState =
         if s.p1Turn then
@@ -139,7 +139,7 @@ object Program extends PureDay:
   end quantumTurn
   def part2(input: A): String =
     val die = DiracDie(3)
-    val turn = quantumTurn(die)
+    val turn = quantumTurn(die, targetScore = 21)
     val game = QuantumGameState(
       Map(input._1 -> 1),
       Map(input._2 -> 1)
