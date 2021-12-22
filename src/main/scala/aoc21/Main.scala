@@ -34,7 +34,8 @@ object Main extends IOApp:
     18 -> day18.Program,
     19 -> day19.Program,
     20 -> day20.Program,
-    21 -> day21.Program
+    21 -> day21.Program,
+    22 -> day22.Program
   )
 
   def run(args: List[String]): IO[ExitCode] =
