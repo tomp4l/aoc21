@@ -71,10 +71,10 @@ case class Cuboid(from: Point3d, to: Point3d):
   end slice
 
   def remove(other: Cuboid): Set[Cuboid] =
-    if other.from.x > to.x && other.from.y > to.y && other.from.z > to.z then
-      Set(this)
-    else if other.to.x < from.x && other.to.y < from.y && other.to.z < from.z then
-      Set(this)
+    if (other.from.x > to.x || other.to.x < from.x)
+      && (other.from.y > to.y || other.to.y < from.y)
+      && (other.from.z > to.z || other.to.z < from.z)
+    then Set(this)
     else
       val sliced = this.slice(other.from).flatMap(_.slice(other.to))
       val diced = other.slice(from).flatMap(_.slice(to))
