@@ -69,8 +69,7 @@ object Program extends Some2dDay with PureDay:
       for
         s <- State.get[(Map[Point2d, SeaCucumber], Int)]
         f <- (State.set(s._1) *> doStep)
-          .contramap[(Map[Point2d, SeaCucumber], Int)](_._1)
-          .modify(_ -> (s._2 + 1))
+          .dimap((v: (Map[Point2d, SeaCucumber], Int)) => v._1)(_ -> (s._2 + 1))
       yield f
     val sparseMap = input.collect { case (p, SeaFloor.Occupied(c)) => p -> c }
     val result = doStepWithCount
