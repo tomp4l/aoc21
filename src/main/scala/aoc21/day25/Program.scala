@@ -31,27 +31,28 @@ object Program extends Some2dDay with PureDay:
       case "v" => SeaFloor.Occupied(SeaCucumber.South).pure
       case l => IO.raiseError(new Exception(s"Unparsed: $l"))
 
-  def moveAll(filter: SeaFloor => Boolean, next: Point2d => Point2d) = (m: A) =>
-    val open =
-      m.filter((p, v) => filter(v) && m(next(p)) == SeaFloor.Unoccupied)
-    val moved = open.map((p, v) => next(p) -> v)
-    m ++ (open.keySet.map(_ -> SeaFloor.Unoccupied)) ++ moved
+  def moveAll(filter: SeaCucumber => Boolean, next: Point2d => Point2d) =
+    (m: Map[Point2d, SeaCucumber]) =>
+      val open =
+        m.filter((p, v) => filter(v) && !m.isDefinedAt(next(p)))
+      val moved = open.map((p, v) => next(p) -> v)
+      m -- (open.keySet) ++ moved
 
   def step(maxX: Int, maxY: Int) =
     State
-      .get[A]
+      .get[Map[Point2d, SeaCucumber]]
       .flatMap(initial =>
-        State.modify[A](
+        State.modify[Map[Point2d, SeaCucumber]](
           moveAll(
-            _ == SeaFloor.Occupied(SeaCucumber.East),
+            _ == SeaCucumber.East,
             p =>
               if p.x == maxX then p.copy(x = 0)
               else p + Point2d(1, 0)
           )
         ) *>
-          State.modify[A](
+          State.modify[Map[Point2d, SeaCucumber]](
             moveAll(
-              _ == SeaFloor.Occupied(SeaCucumber.South),
+              _ == SeaCucumber.South,
               p =>
                 if p.y == maxY then p.copy(y = 0)
                 else p + Point2d(0, 1)
@@ -66,13 +67,18 @@ object Program extends Some2dDay with PureDay:
     val doStep = step(maxX, maxY)
     val doStepWithCount =
       for
-        s <- State.get[(A, Int)]
+        s <- State.get[(Map[Point2d, SeaCucumber], Int)]
         f <- (State.set(s._1) *> doStep)
-          .contramap[(A, Int)](_._1)
+          .contramap[(Map[Point2d, SeaCucumber], Int)](_._1)
           .modify(_ -> (s._2 + 1))
       yield f
-    val result = doStepWithCount.iterateUntil(identity).runS((input, 0)).value
+    val sparseMap = input.collect { case (p, SeaFloor.Occupied(c)) => p -> c }
+    val result = doStepWithCount
+      .iterateUntil(identity)
+      .runS(sparseMap -> 0)
+      .value
     result._2.toString
+  end part1
 
   def part2(input: A): String =
     "Merry Christmas!"
